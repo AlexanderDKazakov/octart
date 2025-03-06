@@ -4,6 +4,7 @@
 #include "crc32.h"
 #include "frame.h"
 
+#include <atomic>
 #include <cstring>
 #include <ctime>
 #include <fstream>
@@ -11,7 +12,7 @@
 #include <vector>
 
 void TCPServer::start() {
-  if (running) {
+  if (running.load()) {
     std::cout << "Server is already running!" << std::endl;
     return;
   }
@@ -22,23 +23,23 @@ void TCPServer::start() {
     return;
   }
 
-  running = true;
+  running.store(true);
   std::cout << "Server is running..." << std::endl;
 
   serverThread = std::thread(&TCPServer::runServer, this);
 }
 
 void TCPServer::stop() {
-  if (!running) {
+  if (!running.load()) {
     std::cout << "Server is not running!" << std::endl;
     return;
   }
 
-  running = false;
+  running.store(false);
   std::cout << "Stopping server..." << std::endl;
 
   close(serverSocket); // Close server socket and notify thread to exit
-  serverThread.join(); // Wait for the server thread to finish
+  serverThread.detach();
   std::cout << "Server stopped." << std::endl;
 }
 
@@ -74,7 +75,7 @@ void TCPServer::runServer() {
   sockaddr_in clientAddr;
   socklen_t clientLen = sizeof(clientAddr);
 
-  while (running) {
+  while (running.load(std::memory_order_seq_cst)) {
     int clientSocket =
         accept(serverSocket, (sockaddr *)&clientAddr, &clientLen);
     if (clientSocket < 0) {

@@ -18,7 +18,7 @@ public:
   void stop() override;
 
   ~TCPServer() {
-    if (running) {
+    if (running.load()) {
       stop();
     }
   }

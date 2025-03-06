@@ -6,7 +6,7 @@ TEST(MainFunc, TCPSerTest) {
   EXPECT_EQ(server->get_port(), 12345);
   server->start();
   EXPECT_EQ(server->is_running(), true);
-  sleep(3);
+  std::this_thread::sleep_for(std::chrono::seconds(3));
   server->stop();
   EXPECT_EQ(42, 42);
 }
