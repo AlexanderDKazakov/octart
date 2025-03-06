@@ -5,6 +5,7 @@
 
 // Standard
 #include <arpa/inet.h>
+#include <atomic>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <thread>
